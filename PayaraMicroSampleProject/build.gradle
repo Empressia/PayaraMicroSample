@@ -38,6 +38,34 @@ war {
 	}
 }
 
+task copyRuntime(type: Copy) {
+	into "${buildDir}/runtime/";
+	from configurations.providedRuntime - configurations.providedCompile;
+}
+def libraries = configurations.runtimeClasspath - configurations.providedRuntime;
+task copyLibraries(type: Copy) {
+	into "${buildDir}/libraries/";
+	from libraries;
+}
+task createArgfile {
+	def argfile = file("${buildDir}/argfile/argfile.txt");
+	def runtimeDirectory = file("${buildDir}/runtime/");
+	def librariesDirectory = file("${buildDir}/libraries/");
+	runtimeDirectory.mkdirs();
+	inputs.dir(runtimeDirectory);
+	if(libraries.isEmpty() == false) {
+		librariesDirectory.mkdirs();
+		inputs.dir(librariesDirectory);
+	}
+	outputs.files(argfile);
+	doLast {
+		argfile.parentFile.mkdirs();
+		argfile.write("\"" + (runtimeDirectory.listFiles() + librariesDirectory.listFiles()).join(";").replaceAll("\\\\", "\\\\\\\\") + "\"", "UTF-8");
+	}
+}
+createArgfile.dependsOn(copyRuntime);
+createArgfile.dependsOn(copyLibraries);
+
 javadoc {
 	source = sourceSets.main.allJava;
 	options.charSet "UTF-8";
