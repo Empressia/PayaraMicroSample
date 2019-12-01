@@ -1,0 +1,61 @@
+plugins {
+	id "java";
+	id "war";
+}
+
+ext.moduleName = project.name;
+
+repositories {
+	jcenter();
+}
+
+dependencies {
+	// use Payara Micro.
+	providedRuntime group:"fish.payara.extras", name:"payara-micro", version:"5.194";
+
+	// use JUnit test framework.
+	testImplementation "org.hamcrest:hamcrest:2.2";
+	testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2";
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.5.2";
+
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding "UTF-8";
+	options.compilerArgs << "-parameters";
+}
+
+test {
+	useJUnitPlatform();
+}
+
+war {
+	baseName moduleName;
+	manifest {
+		attributes (
+			"Automatic-Module-Name": moduleName
+		);
+	}
+}
+
+javadoc {
+	source = sourceSets.main.allJava;
+	options.charSet "UTF-8";
+	options.encoding "UTF-8";
+	options.addStringOption("Xdoclint:none", "-quiet");
+}
+task javadocJar(type: Jar) {
+	baseName war.baseName;
+	classifier "javadoc";
+	from javadoc.destinationDir;
+}
+javadocJar.dependsOn(tasks.javadoc);
+artifacts {
+	archives javadocJar;
+}
+
+task start(type: JavaExec) {
+	main = "-jar";
+	args = [configurations.providedRuntime.find { it.name.contains("payara-micro-") }.absolutePath, "--deploy", "\"${buildDir}/libs/${moduleName}.war\""];
+}
+start.dependsOn(tasks.war);
