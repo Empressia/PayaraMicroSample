@@ -4,6 +4,14 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "CopyDependencies",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"command": "./gradlew copyRuntime copyLibraries createArgfile"
+		},
+		{
 			"label": "CopyWebappToApplication",
 			"type": "shell",
 			"presentation": {
@@ -17,7 +25,7 @@
 			"presentation": {
 				"reveal": "silent"
 			},
-			"command": "robocopy \"\"\"${workspaceFolder}/src/main/webapp/WEB-INF/\"\"\" \"\"\"${workspaceFolder}/bin/application/WEB-INF/\"\"\" /e /purge /xo /nfl /ndl /np /njh /njs /r:1 /w:1 /xd classes; exit $(if($LASTEXITCODE -le 8) { 0 } elseif($LASTEXITCODE -eq 16) { if(Test-Path \"\"\"${workspaceFolder}/bin/application/WEB-INF/\"\"\") { 0 } else { New-Item -Path \"\"\"${workspaceFolder}/bin/application/WEB-INF/\"\"\" -ItemType Directory } } else { $LASTEXITCODE })"
+			"command": "robocopy \"\"\"${workspaceFolder}/src/main/webapp/WEB-INF/\"\"\" \"\"\"${workspaceFolder}/bin/application/WEB-INF/\"\"\" /e /purge /xo /nfl /ndl /np /njh /njs /r:1 /w:1 /xd classes lib; exit $(if($LASTEXITCODE -le 8) { 0 } elseif($LASTEXITCODE -eq 16) { if(Test-Path \"\"\"${workspaceFolder}/bin/application/WEB-INF/\"\"\") { 0 } else { New-Item -Path \"\"\"${workspaceFolder}/bin/application/WEB-INF/\"\"\" -ItemType Directory } } else { $LASTEXITCODE })"
 		},
 		{
 			"label": "CopyBinToApplication",
@@ -28,13 +36,21 @@
 			"command": "robocopy \"\"\"${workspaceFolder}/bin/main/\"\"\" \"\"\"${workspaceFolder}/bin/application/WEB-INF/classes/\"\"\" /e /purge /xo /nfl /ndl /np /njh /njs /r:1 /w:1; exit $(if($LASTEXITCODE -le 8) { 0 } elseif($LASTEXITCODE -eq 16) { if(Test-Path \"\"\"${workspaceFolder}/bin/application/WEB-INF/classes/\"\"\") { 0 } else { New-Item -Path \"\"\"${workspaceFolder}/bin/application/WEB-iNF/classes/\"\"\" -ItemType Directory } } else { $LASTEXITCODE })"
 		},
 		{
+			"label": "CopyLibrariesToApplication",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"dependsOn": ["CopyDependencies"],
+			"command": "robocopy \"\"\"${workspaceFolder}/build/libraries/\"\"\" \"\"\"${workspaceFolder}/bin/application/WEB-INF/lib/\"\"\" /e /purge /xo /nfl /ndl /np /njh /njs /r:1 /w:1; exit $(if($LASTEXITCODE -le 8) { 0 } elseif($LASTEXITCODE -eq 16) { if(Test-Path \"\"\"${workspaceFolder}/bin/application/WEB-INF/lib/\"\"\") { 0 } else { New-Item -Path \"\"\"${workspaceFolder}/bin/application/WEB-INF/lib/\"\"\" -ItemType Directory } } else { $LASTEXITCODE })"
+		},
+		{
 			"label": "PrepareLaunchApplication",
 			"type": "shell",
 			"presentation": {
 				"reveal": "silent"
 			},
-			"dependsOn": ["CopyWebappToApplication", "CopyWEB-INFToApplication", "CopyBinToApplication"],
-			"command": "./gradlew copyRuntime copyLibraries createArgfile"
+			"dependsOn": ["CopyWebappToApplication", "CopyWEB-INFToApplication", "CopyBinToApplication", "CopyLibrariesToApplication"],
 		},
 		{
 			"label": "ReloadApplication",

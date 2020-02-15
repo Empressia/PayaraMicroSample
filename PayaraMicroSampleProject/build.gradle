@@ -60,7 +60,7 @@ task createArgfile {
 	outputs.files(argfile);
 	doLast {
 		argfile.parentFile.mkdirs();
-		argfile.write("\"" + (runtimeDirectory.listFiles() + librariesDirectory.listFiles()).join(";").replaceAll("\\\\", "\\\\\\\\") + "\"", "UTF-8");
+		argfile.write("\"" + runtimeDirectory.listFiles().join(";").replaceAll("\\\\", "\\\\\\\\") + "\"", "UTF-8");
 	}
 }
 createArgfile.dependsOn(copyRuntime);
